@@ -9,13 +9,11 @@ server.on('request', (req, res) => {
   if (req.url === '/') {
     res.statusCode = 200
     res.setHeader('Content-Type', 'text/html')
-    res.write(`<html>
-                <body>
+    res.write(`
                 <h1>Hello Node</h1>
                 <a href="http://localhost:8000/read-message">Read Message</a>
                 <a href="http://localhost:8000/write-message">Write Message</a>
-                </body>
-                </html>`)
+            `)
     res.end()
   }
 
@@ -26,20 +24,12 @@ server.on('request', (req, res) => {
         if (err.code === 'ENOENT') {
           res.statusCode = 404
           res.setHeader('Content-Type', 'text/html')
-          res.write('<html>')
-          res.write('<body>')
           res.write('<h1>Not Found.</h1>')
-          res.write('</body>')
-          res.write('</html>')
           res.end()
         } else {
           res.statusCode = 500
           res.setHeader('Content-Type', 'text/html')
-          res.write('<html>')
-          res.write('<body>')
           res.write('<h1>A Server Error has occurred.</h1>')
-          res.write('</body>')
-          res.write('</html>')
           res.end()
         }
       } else {
@@ -49,14 +39,15 @@ server.on('request', (req, res) => {
     })
   }
 
-  if (req.url === '/write-message') {
+  if (req.url === '/write-message' && req.method === 'GET') {
     res.statusCode = 200
     res.setHeader('Content-Type', 'text/html')
     res.write(`
-    <form method="POST">
-    <input type="text" name="message"></input>
-    </form>
+            <form method="POST">
+            <input type="text" name="message"></input>
+            </form>
     `)
+
     res.end()
   }
 
@@ -68,9 +59,8 @@ server.on('request', (req, res) => {
 
     req.on('end', () => {
       const parseBody = Buffer.concat(body).toString()
-      const message = parseBody.split('=')[1]
+      const message = parseBody.split('=')[1].split('+').join(' ')
       fs.writeFile('sample.txt', message, (err) => {
-        console.log('error:', err)
         if (err) throw err
         res.statusCode = 302
         res.setHeader('Location', '/')
